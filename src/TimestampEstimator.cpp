@@ -37,6 +37,22 @@ TimestampEstimator::~TimestampEstimator()
 {
 }
 
+uint64_t
+TimestampEstimator::get_timestamp_estimate() const {
+  using namespace std::chrono;
+  
+  auto time_now = static_cast<uint64_t>(duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count()); // NOLINT
+  auto delta_time = time_now - m_most_recent_system_time;
+      
+  const uint64_t new_timestamp =
+    m_most_recent_daq_time + delta_time * m_clock_frequency_hz / 1000000;
+
+  return new_timestamp;
+  // return m_current_timestamp_estimate.load();
+}
+
+
+
 void
 TimestampEstimator::add_timestamp_datapoint(uint64_t daq_time, uint64_t system_time)
 {
@@ -60,7 +76,7 @@ TimestampEstimator::add_timestamp_datapoint(uint64_t daq_time, uint64_t system_t
     using namespace std::chrono;
 
     auto time_now =
-      static_cast<uint64_t>(duration_cast<microseconds>(system_clock::now().time_since_epoch()).count()); // NOLINT
+      static_cast<uint64_t>(duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count()); // NOLINT
 
     // (PAR 2021-07-22) We only want to _increase_ our timestamp
     // estimate, not _decrease_ it, so we only attempt the update if
