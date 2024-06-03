@@ -43,7 +43,13 @@ public:
   uint64_t get_received_timesync_count() const { return m_received_timesync_count.load(); }
 private:
 
-  std::atomic<uint64_t> m_current_timestamp_estimate;
+  struct TimeSyncPoint {
+    uint64_t daq_time;
+    std::chrono::time_point<std::chrono::steady_clock> system_time;
+  };
+  
+  std::atomic<TimeSyncPoint> m_current_timestamp_estimate;
+
 
   uint64_t m_clock_frequency_hz; // NOLINT(build/unsigned)
   uint64_t m_most_recent_daq_time;
