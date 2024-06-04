@@ -66,17 +66,12 @@ BOOST_AUTO_TEST_CASE(Basics)
 {
   using namespace std::chrono;
   using namespace std::chrono_literals;
-  // // auto queue_ref = iomanager::ConnectionRef{ "queue", "dummy" };
-  // // auto sink =  get_iom_sender<dfmessages::TimeSync>(queue_ref);
-  // // auto source = get_iom_receiver<dfmessages::TimeSync>(queue_ref);
 
   const uint64_t clock_frequency_hz = 62'500'000; // NOLINT(build/unsigned)
 
   const uint32_t run_num = 5;
   utilities::TimestampEstimator te(run_num, clock_frequency_hz);
 
-
-  
   uint64_t daq_time_start = 1'000'000;
   uint64_t system_time_start = static_cast<uint64_t>(duration_cast<microseconds>(system_clock::now().time_since_epoch()).count()); // NOLINT
   uint64_t steady_time_start = static_cast<uint64_t>(duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count()); // NOLINT
@@ -95,48 +90,14 @@ BOOST_AUTO_TEST_CASE(Basics)
     std::this_thread::sleep_for(10ms);
     uint64_t steady_now = static_cast<uint64_t>(duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count());
     uint64_t te_now = te.get_timestamp_estimate();
-    uint64_t te_diff = (te_now-daq_time_start) ;
-    std::cout << te_now << " diff = " << te_diff << " (" << te_diff*1'000'000/clock_frequency_hz << " us), steady us passed = " <<  steady_now - steady_time_start << std::endl;
+    int64_t steady_diff = (steady_now - steady_time_start);
+    int64_t te_diff = (te_now-daq_time_start);
+    int64_t dd = te_diff-(steady_diff*clock_frequency_hz/1'000'000);
+
+    BOOST_CHECK_LT(abs(dd), 1'000);
+
   }
-
-  // // allow previous run timesync queue drain check to complete
-  // std::this_thread::sleep_for(std::chrono::milliseconds(5));
-
-  // // There's no valid timestamp yet, because no TimeSync messages have
-  // // been received. We should immediately return with kInterrupted
-  // std::atomic<bool> do_not_continue_flag{ false };
-  // BOOST_CHECK_EQUAL(te.wait_for_valid_timestamp(do_not_continue_flag),
-  //                   utilities::TimestampEstimatorBase::kInterrupted);
-
-  // std::atomic<bool> continue_flag{ true };
-  // daqdataformats::timestamp_t initial_ts = 1;
-  // dfmessages::TimeSync initial_time_sync(initial_ts);
-  // sink->send(std::move(initial_time_sync), 10ms);
-  // BOOST_CHECK_EQUAL(te.wait_for_valid_timestamp(continue_flag), utilities::TimestampEstimatorBase::kFinished);
-
-  // daqdataformats::timestamp_t ts_now = te.get_timestamp_estimate();
-
-  // // Check that the timestamp has advanced a bit from the initial TimeSync, but not by "too much".
-  // auto too_much = clock_frequency_hz / 10; // 100 ms
-  // BOOST_CHECK_GE(ts_now, initial_ts);
-  // BOOST_CHECK_LT(ts_now, initial_ts + too_much);
-
-  // BOOST_CHECK_EQUAL(te.wait_for_timestamp(ts_now + clock_frequency_hz, continue_flag),
-  //                   utilities::TimestampEstimatorBase::kFinished);
-
-  // ts_now = te.get_timestamp_estimate();
-  // BOOST_CHECK_EQUAL(te.wait_for_timestamp(ts_now + clock_frequency_hz, do_not_continue_flag),
-  //                   utilities::TimestampEstimatorBase::kInterrupted);
-
-  // // Check that the timestamp doesn't go backwards
-  // daqdataformats::timestamp_t ts1 = te.get_timestamp_estimate();
-  // BOOST_CHECK_GE(ts1, initial_ts);
-  // daqdataformats::timestamp_t ts2 = te.get_timestamp_estimate();
-  // BOOST_CHECK_GE(ts2, ts1);
-  // // Check that the timestamp advances
-  // std::this_thread::sleep_for(10ms);
-  // daqdataformats::timestamp_t ts3 = te.get_timestamp_estimate();
-  // BOOST_CHECK_GT(ts3, ts2);
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()
