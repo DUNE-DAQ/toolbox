@@ -19,7 +19,7 @@ find_package(ers REQUIRED)
 
 # We don't have a real library, but we want to create a target for
 # dependents to be able to depend on
-daq_add_library(*.cpp LINK_LIBRARIES nlohmann_json::nlohmann_json logging::logging resolv)
+daq_add_library(*.cpp LINK_LIBRARIES nlohmann_json::nlohmann_json logging::logging resolv atomic)
 
 ##############################################################################
 
@@ -33,8 +33,8 @@ daq_add_unit_test(Resolver_test           LINK_LIBRARIES logging::logging utilit
 daq_add_unit_test(ReusableThread_test           LINK_LIBRARIES logging::logging utilities)
 daq_add_unit_test(WorkerThread_test           LINK_LIBRARIES logging::logging utilities)
 daq_add_unit_test(NamedObject_test        )
-#daq_add_unit_test(TimestampEstimatorSystem_test  LINK_LIBRARIES utilities)
-#daq_add_unit_test(TimestampEstimator_test        LINK_LIBRARIES utilities)
+# daq_add_unit_test(TimestampEstimatorSystem_test  LINK_LIBRARIES utilities)
+daq_add_unit_test(TimestampEstimator_test        LINK_LIBRARIES utilities)
 
 daq_add_application(resolve_hostname resolve_hostname.cpp TEST LINK_LIBRARIES utilities)
 
