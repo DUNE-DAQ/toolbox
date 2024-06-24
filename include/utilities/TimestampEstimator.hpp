@@ -57,6 +57,7 @@ private:
   std::mutex m_datapoint_mutex;
   uint32_t m_run_number {0};
   std::atomic<uint64_t> m_received_timesync_count; // NOLINT(build/unsigned)
+  uint32_t m_current_process_id;
 };
 
 } // namespace utilities
