@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(utilities VERSION 2.4.1)
+project(utilities VERSION 3.0.0)
 
 find_package(daq-cmake REQUIRED)
 daq_setup_environment()
