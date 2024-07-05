@@ -33,7 +33,7 @@ public:
 
   virtual ~TimestampEstimator();
 
-  uint64_t get_timestamp_estimate() const override { return m_current_timestamp_estimate.load(); }
+  uint64_t get_timestamp_estimate() const override;
 
   void add_timestamp_datapoint(uint64_t daq_time, uint64_t system_time);
 
@@ -43,7 +43,13 @@ public:
   uint64_t get_received_timesync_count() const { return m_received_timesync_count.load(); }
 private:
 
-  std::atomic<uint64_t> m_current_timestamp_estimate;
+  struct TimeSyncPoint {
+    uint64_t daq_time;
+    std::chrono::time_point<std::chrono::steady_clock> system_time;
+  };
+  
+  std::atomic<TimeSyncPoint> m_current_timestamp_estimate;
+
 
   uint64_t m_clock_frequency_hz; // NOLINT(build/unsigned)
   uint64_t m_most_recent_daq_time;
@@ -51,6 +57,7 @@ private:
   std::mutex m_datapoint_mutex;
   uint32_t m_run_number {0};
   std::atomic<uint64_t> m_received_timesync_count; // NOLINT(build/unsigned)
+  uint32_t m_current_process_id;
 };
 
 } // namespace utilities
