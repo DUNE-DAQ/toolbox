@@ -12,6 +12,7 @@
 #include "logging/Logging.hpp"
 
 #include <memory>
+#include <unistd.h>
 
 #define TRACE_NAME "TimestampEstimator" // NOLINT
 
@@ -31,6 +32,7 @@ TimestampEstimator::TimestampEstimator(uint64_t clock_frequency_hz) // NOLINT(bu
   , m_run_number(0)
   , m_received_timesync_count(0)
 {
+  m_current_process_id = static_cast<uint32_t>(getpid());
 }
 
 TimestampEstimator::~TimestampEstimator()
