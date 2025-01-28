@@ -25,7 +25,7 @@ namespace utilities {
 class ReusableThread
 {
 public:
-  explicit ReusableThread(int threadid);
+  explicit ReusableThread(int threadid = 0);
 
   ~ReusableThread();
 
