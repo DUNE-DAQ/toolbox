@@ -15,8 +15,12 @@ namespace utilities {
 TimestampEstimatorBase::WaitStatus
 TimestampEstimatorBase::wait_for_valid_timestamp(std::atomic<bool>& continue_flag)
 {
+  auto sleep_time = std::chrono::microseconds(1);
   while (continue_flag.load() && get_timestamp_estimate() == std::numeric_limits<uint64_t>::max()) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(sleep_time);
+    if (sleep_time < std::chrono::milliseconds(10)) {
+      sleep_time *= 2;
+    }
   }
 
   return continue_flag.load() ? TimestampEstimatorBase::kFinished : TimestampEstimatorBase::kInterrupted;
@@ -25,9 +29,13 @@ TimestampEstimatorBase::wait_for_valid_timestamp(std::atomic<bool>& continue_fla
 TimestampEstimatorBase::WaitStatus
 TimestampEstimatorBase::wait_for_timestamp(uint64_t ts, std::atomic<bool>& continue_flag)
 {
+  auto sleep_time = std::chrono::microseconds(1);
   while (continue_flag.load() &&
          (get_timestamp_estimate() < ts || get_timestamp_estimate() == std::numeric_limits<uint64_t>::max())) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(sleep_time);
+    if (sleep_time < std::chrono::milliseconds(10)) {
+      sleep_time *= 2;
+    }
   }
 
   return continue_flag.load() ? TimestampEstimatorBase::kFinished : TimestampEstimatorBase::kInterrupted;
